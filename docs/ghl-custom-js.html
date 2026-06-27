@@ -1,0 +1,39 @@
+<!--
+  HighLevel "Custom JS" install snippet.
+  Paste this into: Sub-Account → Settings → Custom JS / CSS (or a Custom Menu Link that
+  loads an iframe). It mounts the Copilot dashboard inside the GHL shell and passes the
+  current location id + an API token so the embedded app is scoped to the customer account.
+
+  Two integration modes:
+   (A) IFRAME  — simplest. Host the built frontend (packages/frontend/dist) anywhere and
+       point the iframe at it, passing context via query string.
+   (B) INLINE  — load the built bundle directly into a container div (no iframe).
+-->
+
+<!-- ───────── Mode A: iframe (recommended for the sandbox) ───────── -->
+<script>
+  (function () {
+    // GHL exposes the active location id on the window in most app contexts.
+    var locationId =
+      (window.location.pathname.match(/location\/([^/]+)/) || [])[1] ||
+      window.__GHL_LOCATION_ID__ ||
+      "loc_demo_001";
+
+    // Issue/scope this token per location from your backend in production.
+    var token = window.__COPILOT_TOKEN__ || "dev-local-token";
+
+    var APP_URL = "https://your-copilot-host.example.com"; // ← where dist/ is served
+
+    var iframe = document.createElement("iframe");
+    iframe.src =
+      APP_URL + "/?locationId=" + encodeURIComponent(locationId) + "&token=" + encodeURIComponent(token);
+    iframe.style.cssText = "width:100%;height:calc(100vh - 60px);border:0;";
+    iframe.setAttribute("title", "Voice AI Observability Copilot");
+
+    var mount = document.getElementById("copilot-root") || document.body;
+    mount.appendChild(iframe);
+  })();
+</script>
+
+<!-- A container if you want to control placement -->
+<div id="copilot-root"></div>

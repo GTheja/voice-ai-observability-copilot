@@ -1,0 +1,30 @@
+{
+  "name": "voice-ai-observability-copilot",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Agent Observability Copilot for HighLevel Voice AI agents — Monitor & Analyze loops.",
+  "workspaces": [
+    "packages/shared",
+    "packages/backend",
+    "packages/frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,worker,web -c blue,magenta,green \"npm:dev:api\" \"npm:dev:worker\" \"npm:dev:web\"",
+    "dev:mock": "cross-env GHL_ADAPTER=mock LLM_PROVIDER=mock QUEUE_DRIVER=memory DB_DRIVER=memory npm run dev",
+    "dev:api": "npm -w @copilot/backend run dev:api",
+    "dev:worker": "npm -w @copilot/backend run dev:worker",
+    "dev:web": "npm -w @copilot/frontend run dev",
+    "build": "npm -w @copilot/frontend run build",
+    "migrate": "npm -w @copilot/backend run migrate",
+    "seed": "npm -w @copilot/backend run seed",
+    "test": "npm -w @copilot/backend run test",
+    "lint": "npm -w @copilot/backend run lint"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
