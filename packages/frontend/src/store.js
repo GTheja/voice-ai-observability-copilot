@@ -56,9 +56,18 @@ export const useStore = defineStore("copilot", {
       await this.loadSummary();
     },
     async runPoll() {
-      await api.poll();
-      await this.loadSummary();
-      if (this.selectedAgentId) await this.selectAgent(this.selectedAgentId);
+      this.error = null;
+      try {
+        if (api.isDemo()) {
+          await api.ingestDemoTranscript();
+        } else {
+          await api.poll();
+        }
+        await this.loadSummary();
+        if (this.selectedAgentId) await this.selectAgent(this.selectedAgentId);
+      } catch (e) {
+        this.error = e.message;
+      }
     },
   },
 });
