@@ -13,16 +13,23 @@ import {
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
-const props = defineProps({ summary: Array });
+const props = defineProps({ summary: Array, selected: String });
+
+function toneColor(agent) {
+  if (agent.agentId !== props.selected) return "#cbd5e1";
+  const rate = agent.passRate ?? 0;
+  if (rate >= 0.8) return "#1f9d66";
+  if (rate >= 0.7) return "#2f6df6";
+  if (rate >= 0.5) return "#c98117";
+  return "#d94a3f";
+}
 
 const data = computed(() => ({
   labels: props.summary.map((a) => a.name),
   datasets: [
     {
-      label: "Pass rate %",
-      backgroundColor: props.summary.map((a) =>
-        (a.passRate ?? 0) >= 0.8 ? "#1f9d66" : (a.passRate ?? 0) >= 0.7 ? "#2f6df6" : (a.passRate ?? 0) >= 0.5 ? "#c98117" : "#d94a3f",
-      ),
+      label: "Selected agent goal pass rate",
+      backgroundColor: props.summary.map((a) => toneColor(a)),
       borderRadius: 7,
       maxBarThickness: 54,
       data: props.summary.map((a) => Math.round((a.passRate ?? 0) * 100)),

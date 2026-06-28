@@ -20,6 +20,22 @@ export class MockLLMProvider {
     }
     // Recommendation task
     if (prompt.includes("TASK: RECOMMENDATIONS")) {
+      if (/no_refund_promise|confirmed_email|escalated_when_needed/i.test(prompt)) {
+        const kpiKey = extract(prompt, "FAILING_KPI") || "support_triage";
+        return {
+          summary: "Support agent missed one or more triage safeguards; escalation script updates suggested.",
+          recommendations: [
+            {
+              kpiKey,
+              title: "Add a billing escalation guardrail",
+              body:
+                "Update the support script to confirm the account email first, avoid promising refunds, " +
+                "and route billing or outage complaints to a human specialist.",
+              severity: /no_refund_promise/i.test(prompt) ? "critical" : "high",
+            },
+          ],
+        };
+      }
       return {
         summary: "Agent missed one or more success criteria; targeted script edits suggested.",
         recommendations: [

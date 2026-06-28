@@ -110,7 +110,7 @@ function outcomeLabel(outcome) {
           <div class="panel focus-panel">
             <div class="hd">
               <div>
-                <span>{{ store.selectedAgent.name }}</span>
+                <span>Now analyzing: {{ store.selectedAgent.name }}</span>
                 <div class="muted">
                   {{ pct(store.selectedAgent.passRate) }} of script goals passed · quality score {{ store.selectedAgent.avgScore ?? "—" }}
                 </div>
@@ -119,7 +119,7 @@ function outcomeLabel(outcome) {
                 {{ store.selectedAgent.totalCalls }} transcripts
               </span>
             </div>
-            <div class="bd"><PassRateChart :summary="store.summary" /></div>
+            <div class="bd"><PassRateChart :summary="store.summary" :selected="store.selectedAgentId" /></div>
           </div>
 
           <div class="grid2">
