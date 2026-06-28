@@ -15,6 +15,16 @@ onMounted(() => store.loadSummary());
 function pct(n) {
   return n == null ? "—" : `${Math.round(n * 100)}%`;
 }
+
+function outcomeLabel(outcome) {
+  const labels = {
+    booked: "Booked",
+    no_booking: "No booking",
+    escalated: "Escalated",
+    failed: "Failed",
+  };
+  return labels[outcome] || "Outcome pending";
+}
 </script>
 
 <template>
@@ -23,20 +33,20 @@ function pct(n) {
       <div class="brand-block">
         <div class="brand-mark">AI</div>
         <div>
-        <h1>Voice AI Observability Copilot</h1>
-          <div class="sub">Monitor and analyze Voice AI performance</div>
+          <h1>Voice AI Performance Monitor</h1>
+          <div class="sub">Transcripts checked, issues found, fixes suggested</div>
         </div>
       </div>
       <button class="btn primary" @click="store.runPoll()">
         <span class="btn-icon">↻</span>
-        Sync transcripts
+        Ingest transcripts
       </button>
     </header>
 
     <div class="layout">
       <aside class="panel side-panel">
         <div class="hd">
-          <span>Agent Fleet</span>
+          <span>Voice AI agents</span>
           <span class="count-pill">{{ store.summary.length }}</span>
         </div>
         <div class="bd">
@@ -51,20 +61,44 @@ function pct(n) {
       <main class="workspace">
         <section class="overview-strip">
           <div>
-            <div class="eyebrow">Validation Flywheel</div>
-            <h2>Transcript quality control, ready for review.</h2>
+            <div class="eyebrow">Validation flywheel</div>
+            <h2>Monitor calls, find missed goals, recommend agent improvements.</h2>
           </div>
           <div class="summary-pills">
-            <span class="badge ok">Webhook ready</span>
-            <span class="badge warn">Mock LLM demo</span>
+            <span class="badge ok">Webhook ingestion ready</span>
+            <span class="badge warn">Demo data mode</span>
+          </div>
+        </section>
+
+        <section class="flow-strip" aria-label="Observability workflow">
+          <div class="flow-step">
+            <span class="step-num">1</span>
+            <div>
+              <strong>Monitor transcripts</strong>
+              <span>Ingest Voice AI calls and check each agent against its script goals.</span>
+            </div>
+          </div>
+          <div class="flow-step">
+            <span class="step-num">2</span>
+            <div>
+              <strong>Find performance issues</strong>
+              <span>Highlight failed KPIs, missed opportunities, and risky call moments.</span>
+            </div>
+          </div>
+          <div class="flow-step">
+            <span class="step-num">3</span>
+            <div>
+              <strong>Improve the agent</strong>
+              <span>Create human review tasks and prompt/script recommendations.</span>
+            </div>
           </div>
         </section>
 
         <div class="stat-row">
-          <StatCard label="Total calls analyzed" :value="store.totals.calls" />
-          <StatCard label="Avg pass rate" :value="pct(store.totals.avgPassRate)" />
+          <StatCard label="Transcripts checked" :value="store.totals.calls" />
+          <StatCard label="Goals passed on average" :value="pct(store.totals.avgPassRate)" />
           <StatCard
-            label="Open use-actions"
+            label="Human follow-ups"
             :value="store.totals.openUseActions"
             :tone="store.totals.openUseActions ? 'bad' : 'ok'"
           />
@@ -77,10 +111,12 @@ function pct(n) {
             <div class="hd">
               <div>
                 <span>{{ store.selectedAgent.name }}</span>
-                <div class="muted">Pass rate {{ pct(store.selectedAgent.passRate) }} · avg score {{ store.selectedAgent.avgScore ?? "—" }}</div>
+                <div class="muted">
+                  {{ pct(store.selectedAgent.passRate) }} of script goals passed · quality score {{ store.selectedAgent.avgScore ?? "—" }}
+                </div>
               </div>
               <span class="badge" :class="store.selectedAgent.passRate >= 0.7 ? 'ok' : 'warn'">
-                {{ store.selectedAgent.totalCalls }} calls
+                {{ store.selectedAgent.totalCalls }} transcripts
               </span>
             </div>
             <div class="bd"><PassRateChart :summary="store.summary" /></div>
@@ -89,8 +125,8 @@ function pct(n) {
           <div class="grid2">
             <div class="panel">
               <div class="hd">
-                <span>Use Actions</span>
-                <span class="muted">Human review queue</span>
+                <span>Human follow-up needed</span>
+                <span class="muted">Use Actions from failed transcript checks</span>
               </div>
               <div class="bd">
                 <UseActions
@@ -103,8 +139,8 @@ function pct(n) {
 
             <div class="panel">
               <div class="hd">
-                <span>Recommendations</span>
-                <span class="muted">Prompt and script fixes</span>
+                <span>Suggested agent improvements</span>
+                <span class="muted">Prompt and script recommendations</span>
               </div>
               <div class="bd"><Recommendations :items="store.detail.recommendations" /></div>
             </div>
@@ -112,33 +148,39 @@ function pct(n) {
 
           <div class="grid2 lower-grid">
             <div class="panel">
-              <div class="hd">Observability parameters (KPIs)</div>
+              <div class="hd">
+                <span>Agent success criteria</span>
+                <span class="muted">Observability parameters / KPIs</span>
+              </div>
               <div class="bd"><KpiList :kpis="store.detail.kpis" /></div>
             </div>
 
             <div class="panel">
-              <div class="hd">Recent calls</div>
+              <div class="hd">
+                <span>Analyzed call transcripts</span>
+                <span class="muted">Click any call to inspect the conversation</span>
+              </div>
               <div class="bd">
                 <div
-                  v-for="c in store.detail.calls"
+                  v-for="(c, index) in store.detail.calls"
                   :key="c.id"
                   class="call-item"
                   @click="store.openCall(c.id)"
                 >
-                  <div class="name">{{ c.externalCallId }}</div>
+                  <div class="name">Transcript {{ index + 1 }}</div>
                   <div class="meta">
-                    <span class="badge ok">{{ c.status }}</span>
-                    <span>{{ c.outcome || "No outcome" }}</span>
+                    <span class="badge ok">Analyzed</span>
+                    <span>{{ outcomeLabel(c.outcome) }}</span>
                     <span>{{ c.durationSec ? c.durationSec + "s" : "" }}</span>
                   </div>
                 </div>
-                <div v-if="!store.detail.calls.length" class="empty-state">No calls yet. Sync transcripts to start analysis.</div>
+                <div v-if="!store.detail.calls.length" class="empty-state">No transcripts yet. Ingest transcripts to start monitoring.</div>
               </div>
             </div>
           </div>
         </template>
 
-        <div v-else-if="!store.loading" class="panel"><div class="bd empty-state">No agents found for this location.</div></div>
+        <div v-else-if="!store.loading" class="panel"><div class="bd empty-state">No Voice AI agents found for this location.</div></div>
       </main>
     </div>
 

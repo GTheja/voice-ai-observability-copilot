@@ -27,19 +27,19 @@ function width(n) {
       <div class="agent-head">
         <div>
           <div class="name">{{ a.name }}</div>
-          <div class="muted">{{ a.totalCalls }} analyzed calls</div>
+          <div class="muted">{{ a.totalCalls }} transcripts checked</div>
         </div>
         <span class="health-dot" :class="tone(a.passRate)"></span>
       </div>
       <div class="meta">
-        <span class="badge" :class="tone(a.passRate)">{{ pct(a.passRate) }} pass</span>
-        <span v-if="a.openUseActions" class="badge bad">{{ a.openUseActions }} flags</span>
-        <span v-else class="badge ok">clear</span>
+        <span class="badge" :class="tone(a.passRate)">{{ pct(a.passRate) }} goals passed</span>
+        <span v-if="a.openUseActions" class="badge bad">{{ a.openUseActions }} issues</span>
+        <span v-else class="badge ok">No issues</span>
       </div>
       <div class="mini-bar">
         <span :class="tone(a.passRate)" :style="{ width: width(a.passRate) }"></span>
       </div>
     </div>
-    <div v-if="!agents.length" class="empty-state">No agents.</div>
+    <div v-if="!agents.length" class="empty-state">No Voice AI agents found.</div>
   </div>
 </template>
