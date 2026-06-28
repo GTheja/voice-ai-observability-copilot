@@ -95,12 +95,18 @@ function outcomeLabel(outcome) {
         </section>
 
         <div class="stat-row">
-          <StatCard label="Transcripts checked" :value="store.totals.calls" />
-          <StatCard label="Goals passed on average" :value="pct(store.totals.avgPassRate)" />
           <StatCard
-            label="Human follow-ups"
-            :value="store.totals.openUseActions"
-            :tone="store.totals.openUseActions ? 'bad' : 'ok'"
+            label="Selected agent transcripts"
+            :value="store.selectedAgent?.totalCalls ?? store.totals.calls"
+          />
+          <StatCard
+            label="Selected agent goals passed"
+            :value="pct(store.selectedAgent?.passRate ?? store.totals.avgPassRate)"
+          />
+          <StatCard
+            label="Selected agent follow-ups"
+            :value="store.selectedAgent?.openUseActions ?? store.totals.openUseActions"
+            :tone="(store.selectedAgent?.openUseActions ?? store.totals.openUseActions) ? 'bad' : 'ok'"
           />
         </div>
 
